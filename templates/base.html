@@ -1,46 +1,63 @@
 <!DOCTYPE html>
 <html lang="ru">
   <head>
-    <link rel="SHORTCUT ICON" href="{{ url_for('static', filename='img/mini_icon_2.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="keywords" content="Эхос, ЭХОС, Эхос 2022, химия, конференция, Новочеркасск, НПИ, катализ">
     <meta name="description" content="Юбилейное XX Всероссийское Совещание «Электрохимия органических соединений» ЭХОС-2022">
+    <link rel="SHORTCUT ICON" href="{{ url_for('static', filename='img/mini_icon_2.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>ЭХОС-2022</title>
-
   </head>
   <body>
+    <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
     <div class="central">
-      <header>
+      <header class="site-header">
         <img src="{{ url_for('static', filename='img/echoes_jmih.jpg') }}" alt="Echoes 2022" class="header_img">
+        <button class="nav-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-nav">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+        <div class="header_banner" role="img" aria-label="ЭХОС-2022"></div>
       </header>
-      <div class="main">
-        <div class="menu">
-          <ul class="menu_list">
-            <li onclick="location.href='/';">Главная</li>
-            <li onclick="location.href='/organizers';"> Организаторы </li>
-            <li onclick="location.href='/science_committee';"> Научный комитет</li>
-            <li onclick="location.href='/organizing_committee';"> Организационный комитет</li>
-            <li onclick="location.href='/programm';"> Программа </li>
-            <li onclick="location.href='/location';"> Место проведения </li>
-            <li onclick="location.href='/registration';"> Регистрация </li>
-            <li onclick="location.href='/arrangement_fee';"> Оргвзнос </li>
-            <li onclick="location.href='/abstract_preparation';"> Оформление тезисов </li>
-            <li onclick="location.href='/information_support';"> Информационная поддержка</li>
-            <li onclick="location.href='/key_dates';"> Важные даты </li>
-            <li onclick="location.href='/Ilyin';"> Ильин К.Г. </li>
-            <li onclick="location.href='/residence';"> Проживание </li>
-            <li onclick="location.href='/post-tour';"> Пост-тур </li>
-            <li onclick="location.href='/contact';"> Контакты </li>
-          </ul>
-        </div>
-        <div class="info">
-            {% block content %}{% endblock %}
-        </div>
-      </div>
-    </div>
-    <div class="bg">
 
+      <div class="main">
+        <nav id="site-nav" class="menu" aria-label="Основная навигация" aria-hidden="false">
+          <ul class="menu_list">
+            <li><a href="/">Главная</a></li>
+            <li><a href="/organizers">Организаторы</a></li>
+            <li><a href="/science_committee">Научный комитет</a></li>
+            <li><a href="/organizing_committee">Организационный комитет</a></li>
+            <li><a href="/programm">Программа</a></li>
+            <li><a href="/location">Место проведения</a></li>
+            <li><a href="/registration">Регистрация</a></li>
+            <li><a href="/arrangement_fee">Оргвзнос</a></li>
+            <li><a href="/abstract_preparation">Оформление тезисов</a></li>
+            <li><a href="/information_support">Информационная поддержка</a></li>
+            <li><a href="/key_dates">Важные даты</a></li>
+            <li><a href="/Ilyin">Ильин К.Г.</a></li>
+            <li><a href="/residence">Проживание</a></li>
+            <li><a href="/post-tour">Пост-тур</a></li>
+            <li><a href="/contact">Контакты</a></li>
+          </ul>
+        </nav>
+        <div class="backdrop" aria-hidden="true"></div>
+
+        <main class="info reveal" role="main">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <span>© ЭХОС-2022</span>
+          <span class="dot"></span>
+          <span>ЮРГПУ(НПИ)</span>
+        </div>
+      </footer>
     </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
   </body>
 </html>

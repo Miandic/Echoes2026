@@ -8,6 +8,16 @@ def mainp(name = None):
     return render_template('00index.html', name=name)
 
 
+@app.route('/about')
+def about(name = None):
+    return render_template('about.html', name=name)
+
+
+@app.route('/participants')
+def participants(name = None):
+    return render_template('participants.html', name=name)
+
+
 @app.route('/organizers')
 def org(name = None):
     return render_template('01org.html', name=name)

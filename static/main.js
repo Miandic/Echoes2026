@@ -1,54 +1,66 @@
 // Mobile nav toggle and reveal-on-scroll
 (function() {
-  const toggle = document.querySelector('.nav-toggle');
-  const nav = document.getElementById('site-nav');
   const backdrop = document.querySelector('.backdrop');
+  const dropdownItems = document.querySelectorAll('.has-dropdown');
 
-  function openMenu() {
-    if (!nav) return;
-    nav.classList.add('open');
-    document.body.classList.add('no-scroll');
-    if (backdrop) backdrop.classList.add('show');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    if (nav) nav.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeMenu() {
-    if (!nav) return;
-    nav.classList.remove('open');
-    document.body.classList.remove('no-scroll');
-    if (backdrop) backdrop.classList.remove('show');
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
-    if (nav) nav.setAttribute('aria-hidden', 'true');
-  }
-
-  if (toggle && nav) {
-    toggle.addEventListener('click', () => {
-      const expanded = toggle.getAttribute('aria-expanded') === 'true';
-      if (expanded) closeMenu(); else openMenu();
+  // Close on backdrop click
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      document.body.classList.remove('no-scroll');
+      backdrop.classList.remove('show');
     });
   }
 
-  // Close on link click (mobile)
-  if (nav) {
-    nav.addEventListener('click', (e) => {
-      const t = e.target;
-      if (t && t.tagName === 'A' && nav.classList.contains('open')) {
-        closeMenu();
+  // Email copy to clipboard
+  const emailButton = document.querySelector('.email-copy');
+  if (emailButton) {
+    emailButton.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const email = this.getAttribute('data-email');
+      
+      try {
+        await navigator.clipboard.writeText(email);
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = email;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          this.classList.add('copied');
+          setTimeout(() => {
+            this.classList.remove('copied');
+          }, 2000);
+        } catch (err2) {
+          console.error('Failed to copy email:', err2);
+        }
+        document.body.removeChild(textArea);
       }
     });
   }
 
-  // Close on backdrop click
-  if (backdrop) {
-    backdrop.addEventListener('click', closeMenu);
-  }
-
-  // ESC to close
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && nav && nav.classList.contains('open')) {
-      closeMenu();
-    }
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
   });
 
   // Reveal on scroll
@@ -82,8 +94,7 @@
     canvas.style.height = h + 'px';
     if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Recompute particle count based on area
-    const density = 0.00008; // particles per px^2
+    const density = 0.00008;
     const target = Math.max(20, Math.min(160, Math.floor(w * h * density)));
     particles = createParticles(target, w, h);
   }
@@ -102,39 +113,37 @@
     return arr;
   }
 
-  function step(ts) {
-    if (!ctx || !canvas) return;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-  const dt = Math.min(32, ts - lastTs || 16) * 0.25; // slow down to ~0.25x
-    lastTs = ts;
-
-    ctx.clearRect(0, 0, w, h);
-
-    // Update
+  function updateParticles(dt, w, h) {
     for (let p of particles) {
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      if (p.x < -10) p.x = w + 10;
-      if (p.x > w + 10) p.x = -10;
-      if (p.y < -10) p.y = h + 10;
-      if (p.y > h + 10) p.y = -10;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+      p.x = Math.max(0, Math.min(w, p.x));
+      p.y = Math.max(0, Math.min(h, p.y));
     }
+  }
 
-    // Draw links
-    const linkDist = Math.max(60, Math.min(180, Math.hypot(w, h) * 0.07));
+  function drawParticles() {
+    if (!ctx || !canvas) return;
+    const w = canvas.width / (Math.min(window.devicePixelRatio || 1, 2));
+    const h = canvas.height / (Math.min(window.devicePixelRatio || 1, 2));
+
+    ctx.clearRect(0, 0, w, h);
+
+    const maxDist = 140;
+    const maxDist2 = maxDist * maxDist;
     for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
       for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i];
         const b = particles[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const d2 = dx*dx + dy*dy;
-        if (d2 < linkDist * linkDist) {
-          const d = Math.sqrt(d2);
-          const alpha = 0.35 * (1 - d / linkDist);
-          ctx.strokeStyle = `rgba(203, 213, 225, ${alpha.toFixed(3)})`;
-          ctx.lineWidth = 1;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < maxDist2) {
+          const alpha = (1 - Math.sqrt(d2) / maxDist) * 0.12;
+          ctx.strokeStyle = `rgba(96,165,250,${alpha})`;
+          ctx.lineWidth = 0.8;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -143,34 +152,30 @@
       }
     }
 
-    // Draw particles (glow)
+    ctx.fillStyle = 'rgba(147,197,253,0.6)';
     for (let p of particles) {
-      ctx.fillStyle = 'rgba(147, 197, 253, 0.9)';
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
-
-    rafId = requestAnimationFrame(step);
   }
 
-  function startParticles() {
-    if (!canvas || !ctx || prefersReduced) return;
+  function animate(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 16, 3);
+    lastTs = ts;
+
+    const w = canvas ? canvas.width / (Math.min(window.devicePixelRatio || 1, 2)) : 0;
+    const h = canvas ? canvas.height / (Math.min(window.devicePixelRatio || 1, 2)) : 0;
+    updateParticles(dt, w, h);
+    drawParticles();
+
+    rafId = requestAnimationFrame(animate);
+  }
+
+  if (canvas && ctx && !prefersReduced) {
     resizeCanvas();
-    if (!rafId) rafId = requestAnimationFrame(step);
-  }
-
-  function stopParticles() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-
-  // Initialize
-  if (canvas && !prefersReduced) {
-    startParticles();
     window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stopParticles(); else if (!rafId) startParticles();
-    });
+    animate(0);
   }
 })();

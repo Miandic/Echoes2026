@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section id="registration">
+    <h2>Регистрация</h2>
+    <div class="form-container">
+      <script src="https://forms.yandex.ru/_static/embed.js"></script>
+      <iframe src="https://forms.yandex.ru/u/695d4e50505690f8f4902a4b?iframe=1" frameborder="0" name="ya-form-695d4e50505690f8f4902a4b" class="yandex-form"></iframe>
+    </div>
+  </section>
+
+  <section id="fee">
+    <h2>Оргвзнос</h2>
+    <div class="fee-table-wrapper">
+      <table class="fee-table">
+        <thead>
+          <tr>
+            <th>Тип участия</th>
+            <th>Оргвзнос</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Очное участие</td>
+            <td>15 000 руб</td>
+          </tr>
+          <tr>
+            <td>Студенты, аспиранты</td>
+            <td>5 000 руб</td>
+          </tr>
+          <tr>
+            <td>Сопровождающее лицо</td>
+            <td>10 000 руб</td>
+          </tr>
+          <tr>
+            <td>Банкет</td>
+            <td>Стоимость уточняется</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><i>Организационный взнос включает публикацию тезисов, раздаточный материал, аренду зала, кофе-брейки, участие в вечере знакомств, экскурсия.</i></p>
+    <p>Оформление договоров на оплату оргвзноса осуществляет АО «Центр развития инновационных технологий «ИТ-Планета».</p>
+    <div class="download-grid">
+      <a class="download-btn" href="#" download>Шаблон договора физ. лицо</a>
+      <a class="download-btn" href="#" download>Шаблон договора юр. лицо</a>
+    </div>
+  </section>
+
+  <section id="key-dates">
+    <h2>Ключевые даты</h2>
+    <ul class="dates-list">
+      <li><strong>01.02.2026</strong> – открытие регистрации участников и приёма тезисов</li>
+      <li><strong>10.09.2026</strong> – окончание приёма тезисов</li>
+      <li><strong>14.09.2026</strong> – уведомление о принятии докладов</li>
+      <li><strong>21.09.2026</strong> – окончание приема регистрационных взносов</li>
+      <li><strong>12.10.2026 – 16.10.2026</strong> – работа конференции</li>
+    </ul>
+  </section>
+
+  <section id="abstract-requirements">
+    <h2>Требования к оформлению тезисов</h2>
+    <ul>
+      <li>Объем тезисов не должен превышать <b>4 страниц формата A4</b>, включая выходную информацию и библиографию.</li>
+      <li>Язык текста тезисов — <b>русский</b></li>
+      <li>Тезисы в виде файла в формате <b>doc.</b> (IvanovAV.doc) и экспертное заключение на них должны быть направлены на электронную почту <b><a href="mailto:ehos.ru@mail.ru">ehos.ru@mail.ru</a></b></li>
+      <li>Формат (размер) постера должен быть <b>А1 (594×841 мм)</b>. Вертикальная ориентация. Цельный лист, не допускается склеивание отдельных листов.</li>
+    </ul>
+    <div class="download-grid">
+      <a class="download-btn" href="{{ url_for('static', filename='Эхос_tezis_template_2026.docx') }}" download>Шаблон тезисов скачать</a>
+    </div>
+    <p style="margin-top: 16px;"><i>Материалы совещания будут опубликованы в виде электронного сборника тезисов (РИНЦ) и размещены на сайте совещания <a href="http://эхос.рф/" target="_blank">http://эхос.рф/</a></i></p>
+  </section>
+
+  <section id="accommodation">
+    <h2>Проживание</h2>
+    <p>Проживание участников совещания возможно по месту проведения совещания в отеле <b>7Peaks Family Resort</b> <a href="https://7peaks.ru/" target="_blank" rel="noopener">https://7peaks.ru/</a></p>
+    <p><b>Адрес:</b> Карачаево-Черкесская Республика, с. Архыз, пос. Романтик, ул. Горная 24.</p>
+    <p><i>Проживание возможно в других отелях курорта Архыз (пос. Романтик)</i></p>
+  </section>
+
+  <section id="how-to-get">
+    <h2>Как добраться</h2>
+    <p>Курорт Архыз расположен в Зеленчукском районе КЧР Ставропольского края. <a href="https://yandex.ru/maps/-/CDdkaBYk" target="_blank" rel="noopener">Карта</a></p>
+    <ul>
+      <li><b>Ближайший аэропорт:</b> Минеральные воды - 210 км</li>
+      <li><b>Ближайшая железнодорожная станция:</b> Невинномысск - 95 км</li>
+      <li><b>Транспорт:</b> Такси или рейсовые автобусы до курорта Архыз</li>
+    </ul>
+    <p><i>Уточняйте, что нужен поселок Романтик (12 км от с. Архыз)</i></p>
+  </section>
+{% endblock %}

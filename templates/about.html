@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section id="organizers">
+    <h2>Организаторы</h2>
+    <ul class="org-list">
+      <li>
+        <img src="{{ url_for('static', filename='img/NPI.png') }}" alt="ЮРГПУ (НПИ)" class="org-logo">
+        <span>Южно-Российский государственный политехнический университет (НПИ) имени М.И. Платова (Новочеркасск)</span>
+      </li>
+      <li>
+        <img src="{{ url_for('static', filename='img/IH.png') }}" alt="ИОХ им. Н.Д. Зелинского" class="org-logo">
+        <span>Институт органической химии имени Н.Д. Зелинского Российской Академии Наук (Москва)</span>
+      </li>
+      <li>
+        <img src="{{ url_for('static', filename='img/Logo_blue.png') }}" alt="ФИЦ ПХФ и МХ РАН" class="org-logo">
+        <span>Федеральный исследовательский центр проблем химической физики и медицинской химии Российской Академии Наук (Черноголовка)</span>
+      </li>
+      <li>
+        <img src="{{ url_for('static', filename='img/itplanet.png') }}" alt="ИТ-Планета" class="org-logo">
+        <span>Автономная некоммерческая организация «Центр развития инновационных технологий «ИТ-Планета» (Москва)</span>
+      </li>
+    </ul>
+  </section>
+
+  <section id="science-committee">
+    <h2>Научный комитет</h2>
+    <h3>Сопредседатели:</h3>
+    <ul>
+      <li>Анаников В.П. – академик РАН (ИОХ РАН, Москва)</li>
+      <li>Терентьев А.О. – академик РАН (ИОНХ РАН, Москва)</li>
+    </ul>
+    
+    <h3>Члены научного комитета:</h3>
+    <ul>
+      <li>Будникова Ю.Г. – д.х.н. (ИОФХ им. Арбузова РАН, Казань)</li>
+      <li>Гутерман В.Е. – д.х.н. (ЮФУ, Ростов-на-Дону)</li>
+      <li>Добровольский Ю.А. – д.х.н. (ЦВЭ, Москва)</li>
+      <li>Жукова И.Ю. – д.т.н. (ДГТУ, Ростов-на-Дону)</li>
+      <li>Золотухина Е.В. – д.х.н. (ФИЦ ПХФ и МХ РАН, Черноголовка)</li>
+      <li>Козадеров О.А. – д.х.н. (ВГУ, Воронеж)</li>
+      <li>Колзунова Л.Г. – д.х.н. (ИХ ДВО РАН, Владивосток)</li>
+      <li>Кондратьев В.В. – д.х.н. (СПбГУ, Санкт-Петербург)</li>
+      <li>Кононенко Н.А. – д.х.н. (КубГУ, Краснодар)</li>
+      <li>Корниенко В.Л. – д.х.н. (ИХХТ СО РАН, Красноярск)</li>
+      <li>Кривенко А.Г. – д.ф.-м.н. (ФИЦ ПХФ и МХ РАН, Черноголовка)</li>
+      <li>Куриганова А.Б. – д.т.н. (ЮРГПУ(НПИ), Новочеркасск)</li>
+      <li>Магдесиева Т.В. – д.х.н. (МГУ, Москва)</li>
+      <li>Мендкович А.С. – д.х.н. (ИОХ РАН, Москва)</li>
+      <li>Немудрый А.П. – чл.-корр. РАН (ИХТиМХ, Новосибирск)</li>
+      <li>Парфенюк В.И. – д.х.н. (ИХР РАН, Иваново)</li>
+      <li>Пономаренко С.А. – член-корр. РАН (ИСПМ РАН, Москва)</li>
+      <li>Снытников П.В. – д.х.н. (ИК СО РАН, Новосибирск)</li>
+      <li>Стенина Е.В. – д.х.н. (МГУ, Москва)</li>
+      <li>Турыгин В.В. – д.х.н. (ГосНИИОХТ, Москва)</li>
+      <li>Чернышев В.М. – д.х.н. (Сколтех, Москва)</li>
+      <li>Шинкарь Е.В. – д.х.н. (АГТУ, Астрахань)</li>
+      <li>Элинсон М.Н. – д.х.н. (ИОХ РАН, Москва)</li>
+      <li>Янилкин В.В. – д.х.н. (ИОФХ им. Арбузова РАН, Казань)</li>
+      <li>Ярославцев А.Б. – академик РАН (ИОНХ РАН, Москва)</li>
+      <li>Яхваров Д.Г. – член-корр. РАН (ИОФХ им. Арбузова РАН, Казань)</li>
+    </ul>
+  </section>
+
+  <section id="organizing-committee">
+    <h2>Организационный комитет</h2>
+    <ul>
+      <li>Смирнова Н.В. – д.х.н. (ЮРГПУ(НПИ), Новочеркасск)</li>
+      <li>Бринк И.Ю. – д.т.н. (ЮРГПУ(НПИ), Новочеркасск)</li>
+      <li>Куриганова А.Б. – д.т.н. (ЮРГПУ(НПИ), Новочеркасск)</li>
+      <li>Андреева В.Е. – к.т.н. (ЮРГПУ(НПИ), Новочеркасск)</li>
+      <li>Кубанова М.С. – (ЮРГПУ(НПИ), Новочеркасск)</li>
+    </ul>
+  </section>
+
+  <section id="program">
+    <h2>Научная программа</h2>
+    <p><i>Находится в разработке</i></p>
+  </section>
+
+  <section id="general-info">
+    <h2>Общая информация</h2>
+    <div class="download-grid">
+      <a class="download-btn" href="{{ url_for('static', filename='ЭХОС-2026-1 циркуляр.pdf') }}" download>Первый циркуляр совещаний – PDF</a>
+      <a class="download-btn" href="{{ url_for('static', filename='ЭХОС-2026-логтип.tiff') }}" download>Логотип совещания – TIFF</a>
+      <span class="download-btn is-disabled">Программа совещания – PDF</span>
+      <span class="download-btn is-disabled">Сборник тезисов – PDF</span>
+    </div>
+  </section>
+
+  <section id="sponsors">
+    <h2>Спонсоры</h2>
+    <p><i>Информация будет добавлена позже</i></p>
+  </section>
+
+  <section id="location">
+    <h2>Место проведения</h2>
+    <p><b>Карачаево-Черкесская Республика, с. Архыз, пос. Романтик, ул. Горная 24</b><br>
+    <b>7Peaks Family Resort</b></p>
+    <p>
+      <a href="https://7peaks.ru/" target="_blank" rel="noopener">Сайт отеля: 7peaks.ru</a>
+    </p>
+    <div class="map-widget" style="position:relative;overflow:hidden;">
+      <a href="https://yandex.ru/maps/org/7peaks_family_resort/65609757368/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:0px;">7Peaks Family Resort</a>
+      <a href="https://yandex.ru/maps/11020/karachay-cherkess-republic/category/hotel/184106414/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:14px;">Гостиница в Карачаево‑Черкесской Республике</a>
+      <iframe class="map-widget__frame" src="https://yandex.ru/map-widget/v1/?ll=41.179160%2C43.545516&mode=poi&poi%5Bpoint%5D=41.179397%2C43.545695&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D65609757368&utm_source=share&z=20" width="560" height="400" frameborder="1" allowfullscreen="true" style="position:relative;"></iframe>
+    </div>
+  </section>
+
+  <section id="contacts">
+    <h2>Контакты</h2>
+    <p>Ваши вопросы по участию и программе конференции Вы можете направлять в организационный комитет по адресу:<br>
+    <b><a href="mailto:ehos.ru@mail.ru">ehos.ru@mail.ru</a></b></p>
+    
+    <h3>Канал в Telegram</h3>
+    <p>Подписывайтесь на наш канал, чтобы отслеживать актуальную информацию:<br>
+    <a href="https://t.me/ehos2026" target="_blank" rel="noopener">t.me/ehos2026</a></p>
+  </section>
+{% endblock %}

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="keywords" content="Эхос, ЭХОС, Эхос 2026, химия, конференция, Новочеркасск, НПИ, катализ">
-    <meta name="description" content="Юбилейное XX Всероссийское Совещание «Электрохимия органических соединений» ЭХОС-2026">
+    <meta name="keywords" content="Эхос, ЭХОС, Эхос 2026, химия, конференция, Архыз, катализ">
+    <meta name="description" content="XXI Всероссийское Совещание «Электрохимия органических соединений» ЭХОС-2026">
     <link rel="SHORTCUT ICON" href="{{ url_for('static', filename='img/mini_icon_2.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>ЭХОС-2026</title>
@@ -13,41 +13,65 @@
     <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
     <div class="central">
       <header class="site-header">
-        <img src="{{ url_for('static', filename='img/echoes_jmih.jpg') }}" alt="Echoes 2026" class="header_img">
-        <button class="nav-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-nav">
+        <img src="{{ url_for('static', filename='img/NEW_header.png') }}" alt="Echoes 2026" class="header_img">
+        <div class="header_banner" role="img" aria-label="ЭХОС-2026"></div>
+      </header>
+
+      <nav class="main-nav">
+        <button class="mobile-menu-toggle" aria-label="Открыть меню">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
         </button>
-        <div class="header_banner" role="img" aria-label="ЭХОС-2026"></div>
-      </header>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Главная</a>
+          </li>
+          <li class="nav-item has-dropdown">
+            <a href="/about" class="nav-link">О совещании</a>
+            <ul class="dropdown-menu">
+              <li><a href="/about#organizers">Организаторы</a></li>
+              <li><a href="/about#science-committee">Научный комитет</a></li>
+              <li><a href="/about#organizing-committee">Организационный комитет</a></li>
+              <li><a href="/about#program">Научная программа</a></li>
+              <li><a href="/about#general-info">Общая информация</a></li>
+              <li><a href="/about#sponsors">Спонсоры</a></li>
+              <li><a href="/about#location">Место проведения</a></li>
+              <li><a href="/about#contacts">Контакты</a></li>
+            </ul>
+          </li>
+          <li class="nav-item has-dropdown">
+            <a href="/participants" class="nav-link">Участникам</a>
+            <ul class="dropdown-menu">
+              <li><a href="/participants#registration">Регистрация</a></li>
+              <li><a href="/participants#fee">Оргвзнос</a></li>
+              <li><a href="/participants#key-dates">Ключевые даты</a></li>
+              <li><a href="/participants#abstract-requirements">Требования к оформлению тезисов</a></li>
+              <li><a href="/participants#accommodation">Проживание</a></li>
+              <li><a href="/participants#how-to-get">Как добраться</a></li>
+            </ul>
+          </li>
+        </ul>
+        <div class="nav-contacts">
+          <a href="https://t.me/ehos2026" target="_blank" class="contact-link" title="Telegram канал">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+            </svg>
+            <span class="contact-text">t.me/ehos2026</span>
+          </a>
+          <button class="contact-link email-copy" data-email="ehos.ru@mail.ru" title="Скопировать email">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m2 7 10 6 10-6"/>
+            </svg>
+            <span class="contact-text">ehos.ru@mail.ru</span>
+          </button>
+        </div>
+      </nav>
 
-      <div class="main">
-        <nav id="site-nav" class="menu" aria-label="Основная навигация" aria-hidden="false">
-          <ul class="menu_list">
-            <li><a href="/">Главная</a></li>
-            <li><a href="/organizers">Организаторы</a></li>
-            <li><a href="/science_committee">Научный комитет</a></li>
-            <li><a href="/organizing_committee">Организационный комитет</a></li>
-            <li><a href="/programm">Программа</a></li>
-            <li><a href="/location">Место проведения</a></li>
-            <li><a href="/registration">Регистрация</a></li>
-            <li><a href="/arrangement_fee">Оргвзнос</a></li>
-            <li><a href="/abstract_preparation">Оформление тезисов</a></li>
-            <li><a href="/information_support">Информационная поддержка</a></li>
-            <li><a href="/key_dates">Важные даты</a></li>
-            <li><a href="/Ilyin">Ильин К.Г.</a></li>
-            <li><a href="/residence">Проживание</a></li>
-            <li><a href="/post-tour">Пост-тур</a></li>
-            <li><a href="/contact">Контакты</a></li>
-          </ul>
-        </nav>
-        <div class="backdrop" aria-hidden="true"></div>
-
-        <main class="info reveal" role="main">
-          {% block content %}{% endblock %}
-        </main>
-      </div>
+      <main class="info reveal" role="main">
+        {% block content %}{% endblock %}
+      </main>
 
       <footer class="site-footer">
         <div class="footer-inner">

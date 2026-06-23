@@ -2,8 +2,10 @@ import os
 import re
 import uuid
 import json
+import logging
 import sqlite3
 import smtplib
+import threading
 import urllib.request
 import urllib.error
 from email.mime.text import MIMEText
@@ -54,6 +56,38 @@ REPORT_LABELS = {
     'none': 'Без доклада',
 }
 
+# Таймаут на все SMTP-операции (сек). Без него зависший почтовый сервер
+# блокировал воркер gunicorn до WORKER TIMEOUT и письмо терялось.
+SMTP_TIMEOUT = int(os.environ.get('SMTP_TIMEOUT', '20'))
+
+# ── Audit log ────────────────────────────────────────────────────────────────
+# Важные события (регистрации, оплаты, успехи/неудачи, письма) пишутся в
+# ОТДЕЛЬНЫЙ файл без ротации — он хранится вечно для последующих сверок.
+# Это НЕ access-лог gunicorn (там только запросы страниц, и он ротируется).
+AUDIT_LOG_PATH = os.environ.get(
+    'AUDIT_LOG_PATH',
+    os.path.join(os.path.dirname(__file__), 'logs', 'audit.log'),
+)
+
+audit_logger = logging.getLogger('ehos.audit')
+audit_logger.setLevel(logging.INFO)
+audit_logger.propagate = False
+if not any(isinstance(h, logging.FileHandler) for h in audit_logger.handlers):
+    try:
+        os.makedirs(os.path.dirname(AUDIT_LOG_PATH), exist_ok=True)
+        _audit_fh = logging.FileHandler(AUDIT_LOG_PATH, encoding='utf-8')  # append, без ротации
+        _audit_fh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        audit_logger.addHandler(_audit_fh)
+    except Exception as _e:  # noqa: BLE001 — логирование не должно ронять приложение
+        logging.getLogger(__name__).error(f'Audit log init failed: {_e}')
+
+
+def audit(msg, level='info'):
+    """Пишет важное событие в вечный audit.log И в app.logger
+    (чтобы оно также ушло в gunicorn error log и Telegram-форвардер)."""
+    getattr(audit_logger, level, audit_logger.info)(msg)
+    getattr(app.logger, level, app.logger.info)(msg)
+
 
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
@@ -84,6 +118,7 @@ def init_db():
             ('payment_link_id', 'TEXT'),
             ('operation_id', 'TEXT'),
             ('payment_status', "TEXT DEFAULT 'pending'"),
+            ('notified', 'INTEGER DEFAULT 0'),
         ]:
             try:
                 conn.execute(f'ALTER TABLE registrations ADD COLUMN {col} {definition}')
@@ -194,11 +229,21 @@ def verify_payment(operation_id):
     return {}
 
 
-def send_notification(reg):
-    if not SMTP_USER or not SMTP_PASSWORD:
-        app.logger.warning('Email credentials not configured — skipping notification')
+def _mark_notified(reg_id):
+    """Помечает регистрацию как «уведомление отправлено», чтобы доотправка
+    (reconcile.py) не слала письмо повторно."""
+    if reg_id is None:
         return
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute('UPDATE registrations SET notified = 1 WHERE id = ?', (reg_id,))
+            conn.commit()
+    except Exception as e:
+        app.logger.error(f'mark_notified error for id={reg_id}: {e}')
 
+
+def build_notification_message(reg):
+    """Собирает письмо-уведомление организаторам об оплаченной регистрации."""
     entity_type = reg.get('entity_type')
 
     if entity_type == 'individual':
@@ -234,10 +279,41 @@ def send_notification(reg):
     msg['To'] = ', '.join(NOTIFY_EMAILS)
     msg['Subject'] = 'ЭХОС-2026: новая регистрация (оплата прошла)'
     msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    return msg
 
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
+
+def send_notification_email(reg):
+    """Синхронно отправляет письмо с таймаутом. Бросает исключение при ошибке.
+    Используется как из фоновой отправки, так и из reconcile.py (доотправка)."""
+    msg = build_notification_message(reg)
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as smtp:
         smtp.login(SMTP_USER, SMTP_PASSWORD)
         smtp.sendmail(SMTP_USER, NOTIFY_EMAILS, msg.as_string())
+
+
+def send_notification(reg, reg_id=None):
+    """Отправляет уведомление В ФОНЕ, чтобы зависший SMTP не блокировал ответ
+    пользователю и не приводил к WORKER TIMEOUT. По успеху ставит notified=1.
+    Промах фиксируется в audit.log — потом досылается reconcile.py."""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        audit('Email credentials not configured — skipping notification', 'warning')
+        return
+
+    name = reg.get('full_name') or reg.get('representative_name') or reg.get('company_name') or '—'
+
+    def _worker():
+        try:
+            send_notification_email(reg)
+            _mark_notified(reg_id)
+            audit(f'[MAIL] ✉️ Уведомление отправлено | {name} | {reg.get("email")}')
+        except Exception as e:
+            audit(
+                f'[MAIL-ERR] ❌ Не удалось отправить уведомление | {name} | '
+                f'{reg.get("email")} | {e}',
+                'error',
+            )
+
+    threading.Thread(target=_worker, daemon=True).start()
 
 
 @app.route('/api/register', methods=['POST'])
@@ -328,7 +404,7 @@ def register():
 
         # Лог новой регистрации
         name = data.get('full_name') or data.get('representative_name') or data.get('company_name', '—')
-        app.logger.info(
+        audit(
             f'[REG] Новая регистрация | {name} | {data.get("email")} | '
             f'{PARTICIPATION_LABELS.get(data.get("participation_type",""), data.get("participation_type",""))} | '
             f'ref={payment_link_id[:8]}...'
@@ -405,7 +481,7 @@ def legal_inquiry():
         f"  Итого:                   {cnt_in_person + cnt_student + cnt_accompanying + cnt_remote}\n"
     )
 
-    app.logger.info(
+    audit(
         f'[LEGAL] Заявка от юрлица | {company_name} | {contact_name} | {email} | '
         f'очно={cnt_in_person}, студ={cnt_student}, сопр={cnt_accompanying}, заочно={cnt_remote}'
     )
@@ -417,11 +493,11 @@ def legal_inquiry():
             msg['To']      = ', '.join(NOTIFY_EMAILS)
             msg['Subject'] = f'ЭХОС-2026: заявка от юрлица — {company_name}'
             msg.attach(MIMEText(body, 'plain', 'utf-8'))
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as smtp:
                 smtp.login(SMTP_USER, SMTP_PASSWORD)
                 smtp.sendmail(SMTP_USER, NOTIFY_EMAILS, msg.as_string())
         except Exception as e:
-            app.logger.error(f'Email error (legal_inquiry): {e}')
+            audit(f'[LEGAL-ERR] ❌ Email error (legal_inquiry) | {company_name} | {e}', 'error')
             return jsonify({'error': 'Ошибка при отправке. Попробуйте позже.'}), 500
 
     return jsonify({'ok': True}), 200
@@ -457,7 +533,7 @@ def payment_callback():
         if not operation_id:
             # operationId не был получен от Точки — верифицировать невозможно.
             # Помечаем как pending_manual; организаторы сверяются вручную через ЛК Точки.
-            app.logger.warning(f'Callback success but no operation_id for ref={ref}')
+            audit(f'[PENDING] ⚠️ Callback success без operation_id | ref={ref[:8]}...', 'warning')
             with sqlite3.connect(DB_PATH) as conn:
                 conn.execute(
                     "UPDATE registrations SET payment_status = 'pending_manual' WHERE payment_link_id = ?",
@@ -475,7 +551,7 @@ def payment_callback():
         except Exception as e:
             # Верификация не удалась — fail-closed: не подтверждаем оплату.
             # Организаторы сверяются вручную.
-            app.logger.error(f'Payment verify error for ref={ref}: {e}')
+            audit(f'[PENDING] ⚠️ Ошибка верификации, ручная сверка | ref={ref[:8]}... | {e}', 'error')
             with sqlite3.connect(DB_PATH) as conn:
                 conn.execute(
                     "UPDATE registrations SET payment_status = 'pending_manual' WHERE payment_link_id = ?",
@@ -493,19 +569,18 @@ def payment_callback():
                 conn.commit()
             name = row['full_name'] or row['representative_name'] or row['company_name'] or '—'
             amount = PARTICIPATION_AMOUNTS.get(row['participation_type'], 0)
-            app.logger.info(
+            audit(
                 f'[PAID] ✅ Оплата подтверждена | {name} | {row["email"]} | '
                 f'{PARTICIPATION_LABELS.get(row["participation_type"], row["participation_type"])} | '
                 f'{amount} руб | ref={ref[:8]}...'
             )
-            try:
-                send_notification(dict(row))
-            except Exception as e:
-                app.logger.error(f'Email error: {e}')
+            # Отправка письма — в фоне (не блокирует редирект и не валит воркер).
+            send_notification(dict(row), reg_id=row['id'])
             return redirect('/participants?msg=success')
 
-        app.logger.warning(
-            f'[FAIL] ❌ Оплата не прошла | ref={ref[:8]}... | статус Точки: {status!r}'
+        audit(
+            f'[FAIL] ❌ Оплата не прошла | ref={ref[:8]}... | статус Точки: {status!r}',
+            'warning',
         )
         return redirect('/participants?msg=failed')
 
@@ -519,7 +594,7 @@ def payment_callback():
             (ref,),
         )
         conn.commit()
-    app.logger.warning(f'[FAIL] ❌ Платёж отменён/не прошёл | ref={ref[:8]}...')
+    audit(f'[FAIL] ❌ Платёж отменён/не прошёл | ref={ref[:8]}...', 'warning')
     return redirect('/participants?msg=failed')
 
 

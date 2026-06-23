@@ -2,9 +2,223 @@
 {% block content %}
   <section id="registration">
     <h2>Регистрация</h2>
+
+    {% if msg == 'success' %}
+    <div class="payment-banner payment-banner-success">
+      Оплата прошла успешно! Вы зарегистрированы на ЭХОС-2026. Подтверждение отправлено на вашу электронную почту.
+    </div>
+    {% elif msg == 'failed' %}
+    <div class="payment-banner payment-banner-error">
+      Оплата не прошла. Пожалуйста, проверьте данные карты и попробуйте снова.
+    </div>
+    {% elif msg == 'pending' %}
+    <div class="payment-banner payment-banner-pending">
+      Оплата получена, но подтверждение ещё обрабатывается. Мы свяжемся с вами по электронной почте в течение 1 рабочего дня.
+    </div>
+    {% endif %}
+
     <div class="form-container">
-      <script src="https://forms.yandex.ru/_static/embed.js"></script>
-      <iframe src="https://forms.yandex.ru/u/695d4e50505690f8f4902a4b?iframe=1" frameborder="0" name="ya-form-695d4e50505690f8f4902a4b" class="yandex-form"></iframe>
+
+      <div class="entity-toggle" role="group" aria-label="Тип участника">
+        <button class="toggle-btn active" data-type="individual" type="button">Физ. лицо</button>
+        <button class="toggle-btn" data-type="legal" type="button">Юр. лицо</button>
+      </div>
+
+      <!-- Юр. лицо: форма-запрос -->
+      <div id="legal-info" style="display:none" class="legal-info-block">
+        <p class="legal-info-text">
+          Для юридических лиц оплата оргвзноса производится по договору.<br>
+          Заполните форму — мы свяжемся с вами для оформления документов.
+        </p>
+        <p class="legal-info-text">
+          <strong>Контактное лицо:</strong> Андреева Вероника Евгеньевна<br>
+          Тел. <a href="tel:+79281458458">+7 928 145-84-58</a> &nbsp;·&nbsp;
+          Email: <a href="mailto:ehos.ru@mail.ru">ehos.ru@mail.ru</a>
+        </p>
+
+        <form id="legal-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="legal_company_name">Наименование организации <span class="required">*</span></label>
+            <input class="form-input" type="text" id="legal_company_name" name="legal_company_name" placeholder="ООО «Пример»">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="legal_contact_name">Контактное лицо (ФИО) <span class="required">*</span></label>
+            <input class="form-input" type="text" id="legal_contact_name" name="legal_contact_name" placeholder="Иванов Иван Иванович">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="legal_email">Электронная почта <span class="required">*</span></label>
+            <input class="form-input" type="email" id="legal_email" name="legal_email" placeholder="example@mail.ru">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="legal_phone">Номер телефона <span class="required">*</span></label>
+            <input class="form-input" type="tel" id="legal_phone" name="legal_phone" placeholder="+79001234567">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Планируемое количество участников</label>
+            <div class="legal-participants-grid">
+              <div class="legal-participant-row">
+                <label class="legal-participant-label" for="cnt_in_person">Очное участие</label>
+                <input class="form-input legal-count-input" type="number" id="cnt_in_person" name="cnt_in_person" min="0" value="0" placeholder="0">
+              </div>
+              <div class="legal-participant-row">
+                <label class="legal-participant-label" for="cnt_student">Студенты / аспиранты</label>
+                <input class="form-input legal-count-input" type="number" id="cnt_student" name="cnt_student" min="0" value="0" placeholder="0">
+              </div>
+              <div class="legal-participant-row">
+                <label class="legal-participant-label" for="cnt_accompanying">Сопровождающие лица</label>
+                <input class="form-input legal-count-input" type="number" id="cnt_accompanying" name="cnt_accompanying" min="0" value="0" placeholder="0">
+              </div>
+              <div class="legal-participant-row">
+                <label class="legal-participant-label" for="cnt_remote">Заочное участие</label>
+                <input class="form-input legal-count-input" type="number" id="cnt_remote" name="cnt_remote" min="0" value="0" placeholder="0">
+              </div>
+            </div>
+          </div>
+
+          <div id="legal-form-error" class="form-message form-error" style="display:none"></div>
+          <div id="legal-form-success" class="form-message form-success" style="display:none">
+            Заявка отправлена! Мы свяжемся с вами в ближайшее время.
+          </div>
+
+          <div class="legal-form-actions">
+            <button class="submit-btn" type="submit" id="legal-submit-btn">Отправить заявку</button>
+            <a class="download-btn legal-download-btn"
+               href="{{ url_for('static', filename='Шаблон договора ЭХОС - юр. лицо.docx') }}"
+               download>
+              Скачать шаблон договора
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <form id="reg-form" novalidate>
+        <input type="hidden" id="entity_type" name="entity_type" value="individual">
+
+        <!-- Физ. лицо fields -->
+        <div class="fields-individual">
+          <div class="form-group">
+            <label class="form-label" for="full_name">ФИО <span class="required">*</span></label>
+            <input class="form-input" type="text" id="full_name" name="full_name" placeholder="Иванов Иван Иванович" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="organization">Организация <span class="required">*</span></label>
+            <input class="form-input" type="text" id="organization" name="organization" placeholder="Название организации">
+          </div>
+        </div>
+
+        <!-- Юр. лицо fields -->
+        <div class="fields-legal" style="display:none">
+          <div class="form-group">
+            <label class="form-label" for="company_name">Наименование организации <span class="required">*</span></label>
+            <input class="form-input" type="text" id="company_name" name="company_name" placeholder="ООО «Пример»">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inn">ИНН <span class="required">*</span></label>
+            <input class="form-input" type="text" id="inn" name="inn" placeholder="1234567890">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="representative_name">ФИО представителя <span class="required">*</span></label>
+            <input class="form-input" type="text" id="representative_name" name="representative_name" placeholder="Иванов Иван Иванович">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="representative_position">Должность <span class="required">*</span></label>
+            <input class="form-input" type="text" id="representative_position" name="representative_position" placeholder="Директор">
+          </div>
+        </div>
+
+        <!-- Common fields -->
+        <div class="form-group">
+          <label class="form-label" for="email">Электронная почта <span class="required">*</span></label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="example@mail.ru" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Номер телефона <span class="required">*</span></label>
+          <input class="form-input" type="tel" id="phone" name="phone" placeholder="+79001234567" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Вид доклада <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="report_type" value="oral">
+              <span class="radio-custom"></span>
+              Устный доклад
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="report_type" value="poster">
+              <span class="radio-custom"></span>
+              Стендовый доклад
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="report_type" value="none">
+              <span class="radio-custom"></span>
+              Без доклада
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="hotel" name="hotel">
+            <span class="checkbox-custom"></span>
+            Проживаю в гостинице «7Peaks Family Resort»
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Тип участия <span class="required">*</span></label>
+          <div class="participation-group">
+            <label class="participation-label">
+              <input type="radio" name="participation_type" value="in_person">
+              <span class="participation-card">
+                <span class="participation-name">Очное участие</span>
+                <span class="participation-price">15 000 руб</span>
+              </span>
+            </label>
+            <label class="participation-label">
+              <input type="radio" name="participation_type" value="student">
+              <span class="participation-card">
+                <span class="participation-name">Студенты, аспиранты</span>
+                <span class="participation-price">5 000 руб</span>
+              </span>
+            </label>
+            <label class="participation-label">
+              <input type="radio" name="participation_type" value="accompanying">
+              <span class="participation-card">
+                <span class="participation-name">Сопровождающее лицо</span>
+                <span class="participation-price">10 000 руб</span>
+              </span>
+            </label>
+            <label class="participation-label">
+              <input type="radio" name="participation_type" value="remote">
+              <span class="participation-card">
+                <span class="participation-name">Заочное участие</span>
+                <span class="participation-price">1 000 руб</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="oferta" name="oferta" required>
+            <span class="checkbox-custom"></span>
+            Подтверждаю, что ознакомлен(а) с <a href="/oferta" target="_blank" class="oferta-link">договором оферты</a>
+            <span class="required">*</span>
+          </label>
+        </div>
+
+        <div id="form-error" class="form-message form-error" style="display:none"></div>
+        <div id="form-success" class="form-message form-success" style="display:none">
+          Регистрация успешно принята! Мы свяжемся с вами по указанной электронной почте.
+        </div>
+
+        <button class="submit-btn" type="submit" id="submit-btn">
+          Перейти к оплате
+        </button>
+      </form>
     </div>
   </section>
 
@@ -39,11 +253,6 @@
       </table>
     </div>
     <p><i>Организационный взнос включает публикацию тезисов, раздаточный материал, аренду зала, кофе-брейки, участие в вечере знакомств, экскурсия.</i></p>
-    <p>Оформление договоров на оплату оргвзноса осуществляет АО «Центр развития инновационных технологий «ИТ-Планета».</p>
-    <div class="download-grid">
-      <a class="download-btn" href="#" download>Шаблон договора физ. лицо</a>
-      <a class="download-btn" href="#" download>Шаблон договора юр. лицо</a>
-    </div>
   </section>
 
   <section id="key-dates">
@@ -73,9 +282,18 @@
 
   <section id="accommodation">
     <h2>Проживание</h2>
-    <p>Проживание участников совещания возможно по месту проведения совещания в отеле <b>7Peaks Family Resort</b> <a href="https://7peaks.ru/" target="_blank" rel="noopener">https://7peaks.ru/</a></p>
+    <p>Проживание участников совещания возможно по месту проведения совещания в отеле <b>7Peaks Family Resort</b>.</p>
     <p><b>Адрес:</b> Карачаево-Черкесская Республика, с. Архыз, пос. Романтик, ул. Горная 24.</p>
+    <ul>
+      <li>В отеле <b>7Peaks Family Resort</b> участникам совещания по промокоду <b>«ЭХОС»</b> предоставляется скидка <b>10%</b>.</li>
+    </ul>
     <p><i>Проживание возможно в других отелях курорта Архыз (пос. Романтик)</i></p>
+    <p><a class="site-btn" href="https://7peaks.ru/" target="_blank" rel="noopener">Сайт отеля 7Peaks Family Resort →</a></p>
+    <div class="map-widget" style="position:relative;overflow:hidden;margin-top:16px;">
+      <a href="https://yandex.ru/maps/org/7peaks_family_resort/65609757368/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:0px;">7Peaks Family Resort</a>
+      <a href="https://yandex.ru/maps/11020/karachay-cherkess-republic/category/hotel/184106414/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:14px;">Гостиница в Карачаево‑Черкесской Республике</a>
+      <iframe class="map-widget__frame" src="https://yandex.ru/map-widget/v1/?ll=41.179114%2C43.545659&mode=search&oid=65609757368&ol=biz&z=16.83" width="560" height="400" frameborder="1" allowfullscreen="true" style="position:relative;"></iframe>
+    </div>
   </section>
 
   <section id="how-to-get">

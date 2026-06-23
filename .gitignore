@@ -2,3 +2,9 @@ __pycache__/
 myprojectenv/
 wsgi.py
 echoes2022.ini
+.claude
+.env
+*.db
+registrations.db
+*.tar.gz
+static/*.docx
